@@ -1,0 +1,686 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "vton-oss-serve",
+        "description": "vton-oss endpoints server",
+        "license": {
+            "name": ""
+        },
+        "version": "0.0.1"
+    },
+    "paths": {
+        "/api": {
+            "get": {
+                "summary": "Versions of this package and its first-party dependencies",
+                "operationId": "version_get",
+                "responses": {}
+            }
+        },
+        "/api/token": {
+            "post": {
+                "summary": "Generate a token for a grant flow.\nImplements https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.3",
+                "operationId": "token_post",
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TokenRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Token created"
+                    },
+                    "400": {
+                        "description": "Unauthorized User"
+                    },
+                    "404": {
+                        "description": "Not Found User"
+                    },
+                    "500": {
+                        "description": "Bad Request"
+                    }
+                }
+            }
+        },
+        "/api/v0/model": {
+            "post": {
+                "summary": "Upsert Model",
+                "operationId": "model_upsert_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreatePersonModels"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Model created"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                },
+                "security": [
+                    {
+                        "password": []
+                    }
+                ]
+            }
+        },
+        "/api/v0/model/{id}": {
+            "get": {
+                "summary": "Get Model by id",
+                "operationId": "model_get",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Model id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Model found from database"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            }
+        },
+        "/api/v0/models": {
+            "get": {
+                "summary": "Get PersonModels",
+                "operationId": "models_get",
+                "responses": {
+                    "200": {
+                        "description": "PersonModels found in database"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            }
+        },
+        "/api/v0/profile": {
+            "get": {
+                "summary": "Get profile",
+                "operationId": "profile_get",
+                "responses": {
+                    "200": {
+                        "description": "Profile for user associated with access token"
+                    },
+                    "404": {
+                        "description": "Not found: User does not have associated profile"
+                    }
+                },
+                "security": [
+                    {
+                        "password": []
+                    }
+                ]
+            },
+            "post": {
+                "summary": "Upsert Profile",
+                "operationId": "profile_upsert_post",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateProfiles"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Profile created"
+                    },
+                    "401": {
+                        "description": "Unauthorised: You tried to create a profile for another user"
+                    }
+                },
+                "security": [
+                    {
+                        "password": []
+                    }
+                ]
+            }
+        },
+        "/secured/logout": {
+            "post": {
+                "summary": "Logout a user (uses provided Bearer token from Header)",
+                "operationId": "logout_post",
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                },
+                "security": [
+                    {
+                        "password": []
+                    }
+                ]
+            }
+        },
+        "/secured/secret": {
+            "get": {
+                "summary": "Shows secret to authenticated user (uses provided Bearer token from Header)",
+                "operationId": "secret_get",
+                "responses": {
+                    "200": {
+                        "description": "secret endpoint"
+                    }
+                },
+                "security": [
+                    {
+                        "password": []
+                    }
+                ]
+            }
+        },
+        "/v1/crawl": {
+            "summary": "Web crawler",
+            "post": {
+                "summary": "POST url to crawl",
+                "requestBody": {
+                    "description": "URL to crawl",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ScraperPostBody"
+                            },
+                            "example": {
+                                "url": "https://example.com"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Crawled process update",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ScraperPostBodyResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/crawl/{id}": {
+            "summary": "Web crawler",
+            "get": {
+                "summary": "GET crawled result",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID of crawled result",
+                        "required": false
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Crawled result",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CrawledResult"
+                                },
+                                "example": {
+                                    "completed": 1,
+                                    "creditsUsed": 1,
+                                    "data": [
+                                        {
+                                            "markdown": "1.  [Suits & Tuxedos](/suits-tuxedos/)\n    \n2.  [Navy Stretch Shawl Lapel Tuxedo Separates](#)\n    \n\n![Friar Tux](/on/demandware.static/Sites-FriarTux-Site/-/default/dwf271f94d/images/Stitch-and-Tie-Logo-Black.png)\n\nBuild Your Look\n\nBack to Products ![Close](/on/demandware.static/Sites-FriarTux-Site/-/default/dw1cfc9bee/images/close-icon.svg) \n\n*   ![Navy Stretch Shawl Lapel Tuxedo Separates image number null](https://www.friartux.com/dw/image/v2/BFTS_PRD/on/demandware.static/-/Sites-friartux-catalog-m/default/dwa6d8297d/images/large/friartux-navy-blue-tuxedo-c5450-large-1.png?sw=80&sh=150&sm=fit)\n*   ![Navy Stretch Shawl Lapel Tuxedo Separates image number null](https://www.friartux.com/dw/image/v2/BFTS_PRD/on/demandware.static/-/Sites-friartux-catalog-m/default/dw5c7091dd/images/large/friartux-navy-blue-tuxedo-c5450-large-2.png?sw=80&sh=150&sm=fit)\n*   ![Navy Stretch Shawl Lapel Tuxedo Separates image number null](https://www.friartux.com/dw/image/v2/BFTS_PRD/on/demandware.static/-/Sites-friartux-catalog-m/default/dwa45df582/images/large/friartux-navy-blue-tuxedo-c5450-large-3.png?sw=80&sh=150&sm=fit)\n*   ![Navy Stretch Shawl Lapel Tuxedo Separates image number null](https://www.friartux.com/dw/image/v2/BFTS_PRD/on/demandware.static/-/Sites-friartux-catalog-m/default/dw7946cc4b/images/large/friartux-navy-blue-tuxedo-c5450-large-4.png?sw=80&sh=150&sm=fit)\n\n![Navy Stretch Shawl Lapel Tuxedo Separates image number null](https://www.friartux.com/dw/image/v2/BFTS_PRD/on/demandware.static/-/Sites-friartux-catalog-m/default/dwa6d8297d/images/large/friartux-navy-blue-tuxedo-c5450-large-1.png?sw=752&sh=1252&sm=fit)\n\n![Navy Stretch Shawl Lapel Tuxedo Separates image number null](https://www.friartux.com/dw/image/v2/BFTS_PRD/on/demandware.static/-/Sites-friartux-catalog-m/default/dw5c7091dd/images/large/friartux-navy-blue-tuxedo-c5450-large-2.png?sw=752&sh=1252&sm=fit)\n\n![Navy Stretch Shawl Lapel Tuxedo Separates image number null](https://www.friartux.com/dw/image/v2/BFTS_PRD/on/demandware.static/-/Sites-friartux-catalog-m/default/dwa45df582/images/large/friartux-navy-blue-tuxedo-c5450-large-3.png?sw=752&sh=1252&sm=fit)\n\n![Navy Stretch Shawl Lapel Tuxedo Separates image number null](https://www.friartux.com/dw/image/v2/BFTS_PRD/on/demandware.static/-/Sites-friartux-catalog-m/default/dw7946cc4b/images/large/friartux-navy-blue-tuxedo-c5450-large-4.png?sw=752&sh=1252&sm=fit)\n\nShare this look\n\n*   [](http://www.pinterest.com/pin/create/button/?url=https%3A%2F%2Fwww.friartux.com%2Fsuits-tuxedos%2Fnavy-stretch-shawl-lapel-tuxedo-separates%2FFT-C5450.html&media=https%3A%2F%2Fwww.friartux.com%2Fdw%2Fimage%2Fv2%2FBFTS_PRD%2Fon%2Fdemandware.static%2F-%2FSites-friartux-catalog-m%2Fdefault%2Fdwa6d8297d%2Fimages%2Flarge%2Ffriartux-navy-blue-tuxedo-c5450-large-1.png%3Fsw%3D752%26sh%3D1252%26sm%3Dfit&description=Navy Stretch Shawl Lapel Tuxedo Separates \"Create a Pinterest Pin for Navy Stretch Shawl Lapel Tuxedo Separates\")\n    \n*   [](https://www.facebook.com/share.php?u=https%3A%2F%2Fwww.friartux.com%2Fsuits-tuxedos%2Fnavy-stretch-shawl-lapel-tuxedo-separates%2FFT-C5450.html \"Share Navy Stretch Shawl Lapel Tuxedo Separates on Facebook\")\n    \n\nYour Additional Items\n\n1.  [Suits & Tuxedos](/suits-tuxedos/)\n    \n2.  [Navy Stretch Shawl Lapel Tuxedo Separates](#)\n    \n\nNavy Stretch Shawl Lapel Tuxedo Separates\n=========================================\n\n~Price reduced from $190.00 to~ $133.00\n\nItem No. FT-C5450-40R\n\n4.3 out of 5 Customer Rating 25 REVIEWS\n\nBlue\n\nAvailability:\n\n*   Select Styles for Availability\n    \n\n*    Add & Customize Look\n\nBuy from\n\n$259.95 $181.96\n\nUsually ships in 2-3 business days\n\n[Find Your Fit\\\n\\\nEasily find your size by answering a few simple questions](https://www.friartux.com/fitfinder?returnPid=FT-C5450)\n\nSelect a size 34S 36S 36R 38S 38R 38L 40S 40R 40L 42S 42R 42L 44S 44R 44L 46S 46R 46L 48S 48R 48L 50S 50R 50L 52S 52R 52L 54R 54L 56R 58R\n\nQuantity 1 2 3 4 5 6 7 8 9 10\n\nIf you are only building a look, you do not need to select a size\n\nAdd & Customize Look\n\nRent & Customize Look\n\n### Product Details\n\nfit\n\nSlim\n\nSizes Available\n\n34S-48S; 36R-56R; 38L-54L\n\nLapel\n\nshawl\n\nFabric\n\nPoly-Viscose-Spandex\n\nBrand\n\nCouture 1910\n\nAh a navy tuxedo with a black shawl lapel, is there anything cooler than that? (Not in our opinion) We love the option of adding black pants or navy pants to this navy tuxedo with shawl lapel, plus the option of a black or white shirt. Finish off your look with a black tie and black shoes and you're ready for the red carpet, casino or wedding ceremony!\n\nStretch\n\n*   [description](#description)\n    \n*   [additional information](#addInfo)\n    \n*   [reviews](#reviews)\n    \n\nAh a navy tuxedo with a black shawl lapel, is there anything cooler than that? (Not in our opinion) We love the option of adding black pants or navy pants to this navy tuxedo with shawl lapel, plus the option of a black or white shirt. Finish off your look with a black tie and black shoes and you're ready for the red carpet, casino or wedding ceremony!\n\n|     |     |\n| --- | --- |\n| Product # | Lorem ipsum dolor sit amet |\n| Available packaging | LOLDuis aute irure dolor in reprehenderit |\n| Weight | dolor sit amet |\n| Sunt in culpa qui | Lorem ipsum dolor sit amet |\n\n|     |     |\n| --- | --- |\n| Weight | dolor sit amet |\n| Sunt in culpa qui | Lorem ipsum dolor sit amet |\n| Product # | Lorem ipsum dolor sit amet |\n| Available packaging | LOLDuis aute irure dolor in reprehenderit |\n\n![Han Solo](/on/demandware.static/Sites-FriarTux-Site/-/default/dw56896117/images/reviewavatar.png)Dec 2018\n\n##### Han Solo\n\nOne morning, when Gregor Samsa woke from troubled dreams, he found himself transformed in his bed into a horrible vermin. He lay on his armour-like back, and if he lifted his head a little he could see his brown belly, slightly domed and divided by arches into stiff sections\n\n![Luke Skywalker](/on/demandware.static/Sites-FriarTux-Site/-/default/dw56896117/images/reviewavatar.png)Dec 2018\n\n##### Luke Skywalker\n\nThe bedding was hardly able to cover it and seemed ready to slide off any moment. His many legs, pitifully thin compared with the size of the rest of him, waved about helplessly as he looked. \"What's happened to me?\" he thought. It wasn't a dream.\n\n##### Leave a review\n\nYour name \\* \n\nYour rating \\* ★★★★★ (5/5) ★★★★☆ (4/5) ★★★☆☆ (3/5) ★★☆☆☆ (2/5) ★☆☆☆☆ (1/5)\n\nYour email \\* \n\nReview text \\*\n\nPost review",
+                                            "metadata": {
+                                                "description": "Navy Stretch Shawl Lapel Tuxedo Separates from Friar Tux.",
+                                                "keywords": "Friar Tux",
+                                                "og:image": "https://www.friartux.com/on/demandware.static/-/Sites-friartux-catalog-m/default/dwa6d8297d/images/large/friartux-navy-blue-tuxedo-c5450-large-1.png",
+                                                "og:title": "Navy Stretch Shawl Lapel Tuxedo Separates | FriarTux",
+                                                "og:url": "https://www.friartux.com/suits-tuxedos/navy-stretch-shawl-lapel-tuxedo-separates/FT-C5450.html",
+                                                "ogImage": "https://www.friartux.com/on/demandware.static/-/Sites-friartux-catalog-m/default/dwa6d8297d/images/large/friartux-navy-blue-tuxedo-c5450-large-1.png",
+                                                "ogLocaleAlternate": [],
+                                                "ogTitle": "Navy Stretch Shawl Lapel Tuxedo Separates | FriarTux",
+                                                "ogUrl": "https://www.friartux.com/suits-tuxedos/navy-stretch-shawl-lapel-tuxedo-separates/FT-C5450.html",
+                                                "p:domain_verify": "c0442844bff66429c20ec2a1df7160d0",
+                                                "sourceURL": "https://www.friartux.com/suits-tuxedos/navy-stretch-shawl-lapel-tuxedo-separates/FT-C5450.html",
+                                                "statusCode": 200,
+                                                "title": "Navy Stretch Shawl Lapel Tuxedo Separates | Friar Tux",
+                                                "url": "https://www.friartux.com/suits-tuxedos/navy-stretch-shawl-lapel-tuxedo-separates/FT-C5450.html",
+                                                "viewport": "width=device-width, initial-scale=1"
+                                            }
+                                        }
+                                    ],
+                                    "expiresAt": "2024-12-04T02:54:14.000Z",
+                                    "status": "completed",
+                                    "success": true,
+                                    "total": 1
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/swap": {
+            "summary": "Faceswapper",
+            "post": {
+                "summary": "POST to faceswap",
+                "requestBody": {
+                    "description": "Body to faceswap",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SwapPostRequest"
+                            },
+                            "example": {
+                                "model_img_url": "https://a.com/a.jpg",
+                                "user_img_url": "data:image/jpg;base64,fa"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Faceswap response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SwapPostResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "CrawledResult": {
+                "type": "object",
+                "required": [
+                    "completed",
+                    "creditsUsed",
+                    "data",
+                    "expiresAt",
+                    "status",
+                    "success",
+                    "total"
+                ],
+                "properties": {
+                    "completed": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "creditsUsed": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "data": {
+                        "type": "array"
+                    },
+                    "expiresAt": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "total": {
+                        "type": "integer",
+                        "format": "int64"
+                    }
+                }
+            },
+            "CreatePersonModels": {
+                "type": "object",
+                "description": "Create Struct for a row in table `person_models` for [`PersonModels`]",
+                "properties": {
+                    "bust_mm": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "format": "int32",
+                        "description": "Field representing column `bust_mm`"
+                    },
+                    "hair_colour": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Field representing column `hair_colour`"
+                    },
+                    "height_mm": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "format": "int32",
+                        "description": "Field representing column `height_mm`"
+                    },
+                    "hip_mm": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "format": "int32",
+                        "description": "Field representing column `hip_mm`"
+                    },
+                    "male": {
+                        "type": [
+                            "boolean",
+                            "null"
+                        ],
+                        "description": "Field representing column `male`"
+                    },
+                    "skin_colour": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Field representing column `skin_colour`"
+                    },
+                    "skin_undertone": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Field representing column `skin_undertone`"
+                    },
+                    "url": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Field representing column `url`"
+                    },
+                    "waist_mm": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "format": "int32",
+                        "description": "Field representing column `waist_mm`"
+                    },
+                    "weight_g": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "format": "int32",
+                        "description": "Field representing column `weight_g`"
+                    }
+                }
+            },
+            "CreateProfiles": {
+                "type": "object",
+                "description": "Create Struct for a row in table `profiles` for [`Profiles`]",
+                "required": [
+                    "alias",
+                    "username"
+                ],
+                "properties": {
+                    "alias": {
+                        "type": "string",
+                        "description": "Field representing column `alias`"
+                    },
+                    "bust_mm": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "format": "int32",
+                        "description": "Field representing column `bust_mm`"
+                    },
+                    "hair_colour": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Field representing column `hair_colour`"
+                    },
+                    "height_mm": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "format": "int32",
+                        "description": "Field representing column `height_mm`"
+                    },
+                    "hip_mm": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "format": "int32",
+                        "description": "Field representing column `hip_mm`"
+                    },
+                    "male": {
+                        "type": [
+                            "boolean",
+                            "null"
+                        ],
+                        "description": "Field representing column `male`"
+                    },
+                    "profile_image_url": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Field representing column `profile_image_url`"
+                    },
+                    "skin_colour": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Field representing column `skin_colour`"
+                    },
+                    "skin_undertone": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Field representing column `skin_undertone`"
+                    },
+                    "username": {
+                        "type": "string",
+                        "description": "Field representing column `username`"
+                    },
+                    "waist_mm": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "format": "int32",
+                        "description": "Field representing column `waist_mm`"
+                    },
+                    "weight_g": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "format": "int32",
+                        "description": "Field representing column `weight_g`"
+                    }
+                }
+            },
+            "GrantType": {
+                "type": "string",
+                "enum": [
+                    "password",
+                    "authorization_code",
+                    "client_credentials",
+                    "refresh_token"
+                ]
+            },
+            "ScraperPostBody": {
+                "type": "object",
+                "required": [
+                    "url"
+                ],
+                "properties": {
+                    "url": {
+                        "type": "string"
+                    }
+                }
+            },
+            "ScraperPostBodyResponse": {
+                "type": "object",
+                "required": [
+                    "success",
+                    "id",
+                    "url"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "url": {
+                        "type": "string"
+                    }
+                }
+            },
+            "SwapPostRequest": {
+                "type": "object",
+                "required": [
+                    "user_img_url",
+                    "model_img_url"
+                ],
+                "properties": {
+                    "model_img_url": {
+                        "type": "string"
+                    },
+                    "user_img_url": {
+                        "type": "string"
+                    }
+                }
+            },
+            "SwapPostResponse": {
+                "type": "object",
+                "required": [
+                    "output_url",
+                    "status"
+                ],
+                "properties": {
+                    "output_url": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    }
+                }
+            },
+            "TokenRequest": {
+                "type": "object",
+                "required": [
+                    "grant_type"
+                ],
+                "properties": {
+                    "client_id": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "optional client ID (required, for example, in RFC6749's non password non refresh grant flow)",
+                        "example": null
+                    },
+                    "client_secret": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "optional client secret (as used, e.g., in RFC6749's non (password|refresh) grant flow)",
+                        "example": null
+                    },
+                    "code": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "optional code (required, e.g., in datatracker.ietf.org/doc/html/rfc6749#section-4.1.3)",
+                        "example": null
+                    },
+                    "grant_type": {
+                        "$ref": "#/components/schemas/GrantType",
+                        "description": "RFC6749 grant type"
+                    },
+                    "password": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "optional password (as used, for example, in RFC6749's password grant flow)",
+                        "example": "pass0"
+                    },
+                    "redirect_uri": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "optional redirect_uri (used, e.g., in datatracker.ietf.org/doc/html/rfc6749#section-4.1.3)",
+                        "example": null
+                    },
+                    "refresh_token": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "optional refresh token (as used, for example, in RFC6749's refresh grant flow)",
+                        "example": null
+                    },
+                    "username": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "optional username (as used, for example, in RFC6749's password grant flow)",
+                        "example": "user0"
+                    }
+                }
+            }
+        },
+        "securitySchemes": {
+            "password": {
+                "type": "oauth2",
+                "flows": {
+                    "password": {
+                        "tokenUrl": "/api/token",
+                        "scopes": {}
+                    }
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "vton-oss-serve",
+            "description": "vton-oss endpoints server"
+        }
+    ]
+}
